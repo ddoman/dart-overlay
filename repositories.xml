@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<repositories encoding="UTF-8" version="1.1">
+  <repo priority="50" quality="experimental">
+    <name>dart</name>
+    <description>Dart Overlay</description>
+    <homepage>https://github.com/ddoman/dart-overlay</homepage>
+    <owner>
+      <email>ddoman31@gmail.com</email>
+      <name>Scott Lee</name>
+    </owner>
+    <source type="git">git://github.com/ddoman/dart-overlay.git</source>
+    <feed>http://github.com/ddoman/dart-overlay/commits/master.atom</feed>
+  </repo>
+</repositories>
