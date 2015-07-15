@@ -1,0 +1,7 @@
+# ChangeLog for dev-dart/dart-sdk
+# Copyright 2015 Scott Lee <slee@iused.net>; Distributed under the GPL v2
+
+*dart-sdk-1.11.1 (14 Jul 2015)
+
+  14 Jul 2015; Scott Lee <slee@iused.net> Manifest,
+  dart-sdk-1.10.1.ebuild, dart-sdk-1.11.1
