@@ -4,56 +4,61 @@
 
 EAPI="5"
 
-inherit python
+PYTHON_COMPAT=( python2_7 )
 
-DESCRIPTION="Dark SDK"
+inherit python-single-r1
+
+DESCRIPTION="Dart is an open-source, scalable programming language, with robust libraries and runtimes, for building web, server, and mobile apps."
 HOMEPAGE="http://www.dartlang.org"
+SRC_URI="http://dart.iused.net/sources/dart-sdk-${PV}.tar.bz2"
 
 LICENSE="BSD"
 SLOT="0"
-
-SRC_URI="http://dart.iused.net/sources/dart-sdk-${PV}.tar.bz2"
-KEYWORDS="amd64 x86 ~arm64 ~arm ~mips"
-
+KEYWORDS="~amd64 ~arm ~arm64 ~mips ~x86"
 IUSE="debug"
 
 DEPEND=""
 RDEPEND=""
 
 pkg_setup() {
-	if [[ "${SLOT}" == "0" ]]; then
-		DART_SUFFIX=""
-	else
-		DART_SUFFIX="-${SLOT}"
-	fi
-	DART_HOME="/usr/$(get_libdir)/dart${DART_SUFFIX}"
+	python-single-r1_pkg_setup
+}
 
-	if use x86; then
-		arch="ia32"
-	elif use amd64; then
-		arch="x64"
-	elif use arm; then
-		arch="arm"
-	elif use arm64; then
-		arch="arm64"
-	elif use mips; then
-		arch="mips"
-	fi
+src_prepare() {
+	tc-export CC CXX PKG_CONFIG
+	export BUILDTYPE=Release
+	BUILDMODE="release"
 
-	python-any-r1_pkg_setup
-	${PYTHON} ./tools/gyp_dart.py
+	# debug builds. change install path, remove optimisations and override buildtype
+	if use debug; then
+		BUILDMODE="debug"
+	fi
+}
+
+src_configure() {
+	case ${ABI} in
+		x86) ARCH="ia32";;
+		amd64) ARCH="x64";;
+		arm) ARCH="arm";;
+		arm64) ARCH="arm64";;
+		mips) ARCH="mips";;
+		*) die "Unrecognized ARCH ${ARCH}";;
+	esac
+	"${PYTHON}" tools/gyp_dart.py
 }
 
 src_compile() {
-	${PYTHON} ./tools/build.py -m release --arch=${arch} create_sdk || die
+	"${PYTHON}" tools/build.py -v -m "${BUILDMODE}" -a "${ARCH}" create_sdk || die
 }
 
 src_install() {
-	RELEASE="Release${arch^}"
-	exeinto "${DART_HOME}/bin"
+	DART_ROOT="/usr/$(get_libdir)/dart"
+	RELEASE="${BUILDMODE^}${ARCH^}"
+	exeinto "${DART_ROOT}/bin"
 	doexe out/${RELEASE}/dart-sdk/bin/* || die
-	dosym "${DART_HOME}/bin/dart" /usr/bin/dart || die
+	chmod 755 "${DART_ROOT}/bin/{dart,dart2js,dartanalyzer,dartdocgen,dartfmt,docgen,pub}" || die
+	dosym "${DART_ROOT}/bin/dart" /usr/bin/dart || die
 
-	insinto "${DART_HOME}"
+	insinto "${DART_ROOT}"
 	doins -r out/${RELEASE}/dart-sdk/* || die
 }
