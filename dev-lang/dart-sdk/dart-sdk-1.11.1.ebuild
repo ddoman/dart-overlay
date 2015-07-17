@@ -6,7 +6,7 @@ EAPI="5"
 
 PYTHON_COMPAT=( python2_7 )
 
-inherit python-single-r1
+inherit python-any-r1 pax-utils
 
 DESCRIPTION="Dart is an open-source, scalable programming language, with robust libraries and runtimes, for building web, server, and mobile apps."
 HOMEPAGE="http://www.dartlang.org"
@@ -21,12 +21,17 @@ DEPEND=""
 RDEPEND=""
 
 pkg_setup() {
-	python-single-r1_pkg_setup
+	if [[ "${SLOT}" == "0" ]]; then
+		DART_SDK_SUFFIX=""
+	else
+		DART_SDK_SUFFIX="-${SLOT}"
+	fi
+	DART_SDK_HOME="/usr/$(get_libdir)/dart${DART_SDK_SUFFIX}"
+	python-any-r1_pkg_setup
 }
 
 src_prepare() {
 	tc-export CC CXX PKG_CONFIG
-	export BUILDTYPE=Release
 	BUILDMODE="release"
 
 	# debug builds. change install path, remove optimisations and override buildtype
@@ -44,21 +49,39 @@ src_configure() {
 		mips) ARCH="mips";;
 		*) die "Unrecognized ARCH ${ARCH}";;
 	esac
+	local RELEASE="${BUILDMODE^}${ARCH^}"
+	DART_SDK_OUTPUT="out/${RELEASE}/dart-sdk"
+
 	"${PYTHON}" tools/gyp_dart.py
 }
 
 src_compile() {
 	"${PYTHON}" tools/build.py -v -m "${BUILDMODE}" -a "${ARCH}" create_sdk || die
+	pax-mark m "${DART_SDK_OUTPUT}/bin/dart"
 }
 
 src_install() {
-	DART_ROOT="/usr/$(get_libdir)/dart"
-	RELEASE="${BUILDMODE^}${ARCH^}"
+	local DART_ROOT="/usr/$(get_libdir)/dart"
+
+	# install executable files.
 	exeinto "${DART_ROOT}/bin"
-	doexe out/${RELEASE}/dart-sdk/bin/* || die
-	chmod 755 "${DART_ROOT}/bin/{dart,dart2js,dartanalyzer,dartdocgen,dartfmt,docgen,pub}" || die
+	insinto "${DART_ROOT}/bin"
+	for name in "${DART_SDK_OUTPUT}/bin/"*; do
+		if [ -d "${name}" ]; then
+			doins -r "${name}" || die
+		else
+			doexe "${name}" || die
+		fi
+	done
+
+	# Symlink the dart executable to /usr/bin
 	dosym "${DART_ROOT}/bin/dart" /usr/bin/dart || die
 
+	# install anything else, such as include/*, libs/*, README, and etc.
 	insinto "${DART_ROOT}"
-	doins -r out/${RELEASE}/dart-sdk/* || die
+	for name in "${DART_SDK_OUTPUT}/"*; do
+		if [[ "${name}" != "${DART_SDK_OUTPUT}/bin" ]]; then
+			doins -r "${name}" || die
+		fi
+	done
 }
