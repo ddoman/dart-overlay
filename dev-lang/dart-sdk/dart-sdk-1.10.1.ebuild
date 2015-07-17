@@ -9,7 +9,7 @@ LICENSE="BSD"
 SLOT="0"
 
 SRC_URI="http://dart.iused.net/sources/dart-sdk-${PV}.tar.bz2"
-KEYWORDS="amd64 x86 ~arm64 ~arm ~mips"
+KEYWORDS="~amd64 ~x86 ~arm64 ~arm ~mips"
 
 IUSE="debug"
 
