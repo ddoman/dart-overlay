@@ -3,5 +3,10 @@
 
 *dart-sdk-1.11.1 (14 Jul 2015)
 
+  16 Jul 2015; Scott Lee <slee@iused.net>
+  dart-sdk-1.10.1.ebuild, dart-sdk-1.11.1.ebuild
+  Bug fixes.
+
   14 Jul 2015; Scott Lee <slee@iused.net> Manifest,
-  dart-sdk-1.10.1.ebuild, dart-sdk-1.11.1
+  dart-sdk-1.10.1.ebuild, dart-sdk-1.11.1.ebuild
+  Initial commits.
